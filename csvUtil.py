@@ -112,7 +112,7 @@ def addBookTypeInfoToCsv():
     # 将新列的名字设置为作者
     res['图书类别'] = bookTypeInfo
     # # mode=a，以追加模式写入,header表示列名，默认为true,index表示行名，默认为true，再次写入不需要行名
-    res.to_csv(r"F:\文献（看完）\论文\爬虫\豆瓣读书Top250bookType.csv", mode='a', index=False)
+    res.to_csv(r"F:\文献（看完）\论文\爬虫\豆瓣读书Top250bookType1.csv", mode='a', index=False)
 
 if __name__ == "__main__":
     addBookTypeInfoToCsv()
