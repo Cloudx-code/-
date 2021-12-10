@@ -5,7 +5,7 @@ from neo4jUtil import getNeo4jConn,createRelation,createMasterNode,createSlaveNo
 from csvUtil import getCsv
 # match (n) detach delete n
 # 删库
-
+basePath = r""
 # 通过CN_DB扩充数据
 def expandDataFromCN_DB(graphConn,node1):
     j=0
@@ -147,7 +147,8 @@ def failRecover(graphConn,failData):
     return j
 
 if __name__ == "__main__":
-    savepath = r"F:\文献（看完）\论文\爬虫\豆瓣读书Top250bookType.csv"
+    # savepath = r"F:\文献（看完）\论文\爬虫\豆瓣读书Top250bookType.csv"
+    savepath = basePath+r"豆瓣读书Top250bookType.csv"
     # 获取neo4j连接
     graphCon = getNeo4jConn()
     # 读取爬虫数据i

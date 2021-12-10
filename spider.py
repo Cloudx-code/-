@@ -1,6 +1,5 @@
 # -*- codeing = utf-8 -*-
 # @Time : 2020/3/3 17:51
-
 # @File : spider.py
 # @Software: PyCharm
 
@@ -10,7 +9,7 @@ import urllib.request, urllib.error  # 制定URL，获取网页数据
 import xlwt  # 进行excel操作
 
 import csv
-
+basePath = r""
 def saveToCsv(datalist, savepath):
     headers = ("书籍详情链接", "图片链接", "图书中文名", "图书外国名", "评分", "评价数", "概况", "相关信息")
     with open(savepath, 'w',newline="",encoding='utf-8') as f:
@@ -33,7 +32,8 @@ def main():
     # 1.爬取网页
 
     datalist = getData(baseurl)
-    savepath = "F:\文献（看完）\论文\爬虫\豆瓣读书Top250.csv"
+    # savepath = "F:\文献（看完）\论文\爬虫\豆瓣读书Top250.csv"
+    savepath = basePath+r"豆瓣读书Top250.csv"
     # dbpath = "movie.db"
     print(len(datalist))
     # 3.保存数据

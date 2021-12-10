@@ -11,7 +11,8 @@ baseUrl += bookName
 response = requests.get(baseUrl)
 response.encoding="utf-8"
 print(response.json())
-savepath = r"F:\文献（看完）\论文\爬虫\test.json"
+# savepath = r"F:\文献（看完）\论文\爬虫\test.json"
+savepath = r"test.json"
 with open(savepath, 'w', encoding='utf-8') as f:
     json.dump(response.json(),f,ensure_ascii=False)
 # bookName = "《红楼梦》"
