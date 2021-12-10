@@ -3,9 +3,11 @@ import pandas as pd
 import requests
 import re
 from fake_useragent import UserAgent
+basePath = r""
 #爬取信息并存入
 def getBookTypeInfo():
-    savepath = "F:\文献（看完）\论文\爬虫\豆瓣读书Top250.csv"
+    # savepath = "F:\文献（看完）\论文\爬虫\豆瓣读书Top250.csv"
+    savepath = basePath+r"豆瓣读书Top250.csv"
     res = getCsv(savepath)
     data = []
     j=1
@@ -71,7 +73,8 @@ def getCsv(savepath):
     return res
 
 def getAuthorInfo():
-    savepath = "F:\文献（看完）\论文\爬虫\豆瓣读书Top250.csv"
+    # savepath = "F:\文献（看完）\论文\爬虫\豆瓣读书Top250.csv"
+    savepath = basePath+r"豆瓣读书Top250.csv"
 
     res = getCsv(savepath)
     data = []
