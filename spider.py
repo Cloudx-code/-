@@ -1,6 +1,6 @@
 # -*- codeing = utf-8 -*-
 # @Time : 2020/3/3 17:51
-# @Author : 李巍
+
 # @File : spider.py
 # @Software: PyCharm
 
@@ -38,8 +38,6 @@ def main():
     print(len(datalist))
     # 3.保存数据
     saveToCsv(datalist,savepath)
-    # saveData(datalist, savepath)
-    # saveData2DB(datalist,dbpath)
 
     # askURL("https://movie.douban.com/top250?start=")
 
