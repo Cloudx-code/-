@@ -71,6 +71,13 @@ def getCsv(savepath):
         for row in f_csv:
             res.append(row)
     return res
+# 读取csv某一列信息
+def getOneRowInCsv(savepath,rows):
+    csvData = getCsv(savepath)
+    res = []
+    for data in csvData:
+        res.append(data[rows])
+    return res
 
 def getAuthorInfo():
     # savepath = "F:\文献（看完）\论文\爬虫\豆瓣读书Top250.csv"
@@ -116,6 +123,18 @@ def addBookTypeInfoToCsv():
     res['图书类别'] = bookTypeInfo
     # # mode=a，以追加模式写入,header表示列名，默认为true,index表示行名，默认为true，再次写入不需要行名
     res.to_csv(r"F:\文献（看完）\论文\爬虫\豆瓣读书Top250bookType1.csv", mode='a', index=False)
+
+def saveToCsv(datalist, savepath,headers):
+    with open(savepath, 'w',newline="",encoding='utf-8') as f:
+        f_csv = csv.writer(f)
+        f_csv.writerow(headers)
+        i= 1
+        for data in datalist:
+            print("第",i,"条数据存入ing")
+            i+=1
+            print(data)
+            f_csv.writerow(data)
+    return
 
 if __name__ == "__main__":
     addBookTypeInfoToCsv()

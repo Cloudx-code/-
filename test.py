@@ -2,17 +2,26 @@ from neo4jUtil import getNeo4jConn,getNeo4jNode,createRelation,createSlaveNode,w
 import csv
 from csvUtil import getCsv
 import re
+import json
 import io
 findTheme = re.compile(r'<a.*title="(.*?)"')
 findTheme = re.compile(r'<a class="  tag" href="/tag/.*?">(.*?)</a>')
 
 if __name__ == "__main__":
-    data = getCsv(r"豆瓣读书Top250bookType.csv")
+    listN = []
 
-    for i in data[1:]:
 
-        if float(i[4])>9.5:
-            print(1)
+    with open("authorName.json", "a+", encoding="utf-8") as f:
+        # f.write("曹雪芹")
+        # f.write("\n")
+        # f.write("曹雪芹1")
+        # f.write("\n")
+        for i in f:
+            print(i)
+    if "曹雪芹" in listN:
+        print(2323)
+
+
 
 
 
