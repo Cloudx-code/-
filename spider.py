@@ -1,7 +1,6 @@
-# -*- codeing = utf-8 -*-
 # @Time : 2020/3/3 17:51
 # @File : spider.py
-# @Software: PyCharm
+
 
 from bs4 import BeautifulSoup  # 网页解析，获取数据
 import re  # 正则表达式，进行文字匹配
@@ -9,9 +8,11 @@ import urllib.request, urllib.error  # 制定URL，获取网页数据
 import xlwt  # 进行excel操作
 
 import csv
+
+
 basePath = r""
-def saveToCsv(datalist, savepath):
-    headers = ("书籍详情链接", "图片链接", "图书中文名", "图书外国名", "评分", "评价数", "概况", "相关信息")
+def saveToCsv(datalist, savepath,headers):
+
     with open(savepath, 'w',newline="",encoding='utf-8') as f:
         f_csv = csv.writer(f)
         f_csv.writerow(headers)
@@ -26,18 +27,18 @@ def saveToCsv(datalist, savepath):
 
 def main():
 
-    baseurl = "https://book.douban.com/top250?start="
+    bookBaseURL = "https://book.douban.com/top250?start="
     # baseurl = "https://book.douban.com/tag/%E5%B0%8F%E8%AF%B4?start=980&type=T"
 
     # 1.爬取网页
-
-    datalist = getData(baseurl)
+    datalist = getBookData(bookBaseURL)
     # savepath = "F:\文献（看完）\论文\爬虫\豆瓣读书Top250.csv"
-    savepath = basePath+r"豆瓣读书Top250.csv"
-    # dbpath = "movie.db"
+    bookSavePath = basePath+r"豆瓣读书Top250.csv"
+
     print(len(datalist))
     # 3.保存数据
-    saveToCsv(datalist,savepath)
+    bookHeaders = ("书籍详情链接", "图片链接", "图书中文名", "图书外国名", "评分", "评价数", "概况", "相关信息")
+    saveToCsv(datalist,bookSavePath,bookHeaders)
 
     # askURL("https://movie.douban.com/top250?start=")
 
@@ -52,18 +53,16 @@ findTitle = re.compile(r'<a.*title="(.*?)"')
 findRating = re.compile(r'<span class="rating_nums">(.*)</span>')
 # 找到评价人数
 findJudge = re.compile(r'<span class="pl">\(\n                    (.*?)人评价',re.S)
-
 # 英文名：<span style="font-size:12px;">Nineteen Eighty-Four</span>
 findEnName = re.compile(r'<span style="font-size:12px;">(.*?)</span>')
-
 # 找到概况
 findInq = re.compile(r'<span class="inq">(.*)</span>')
 # 找到书籍的相关内容
 findBd = re.compile(r'<p class="pl">(.*?)</p>', re.S)
 
 
-# 爬取网页
-def getData(baseurl):
+# 爬取图书网页数据
+def getBookData(baseurl):
     print("爬数据ing")
     datalist = []
     for i in range(0, 10):  # 调用获取页面信息的函数，10次
@@ -112,8 +111,6 @@ def getData(baseurl):
 
             tables = soup.find_all('table')
 
-            # judgeNum = re.findall(r"\d+", tables[i].find('span', attrs={'class': 'pl'}).text)
-            # i+=1
             judgeNum = re.findall(findJudge, item)[0]
             data.append(judgeNum)  # 提加评价人数
 
@@ -128,10 +125,9 @@ def getData(baseurl):
             bd = re.sub('<br(\s+)?/>(\s+)?', " ", bd)  # 去掉<br/>
             bd = re.sub('/', " ", bd)  # 替换/
             data.append(bd.strip())  # 去掉前后的空格
-
             datalist.append(data)  # 把处理好的一本图书信息放入datalist
-
     return datalist
+
 
 
 # 得到指定一个URL的网页内容
@@ -142,9 +138,7 @@ def askURL(url):
                       " Chrome / 94.0.4606.81 Safari / 537.36"
 
     }
-
     # 用户代理，表示告诉豆瓣服务器，我们是什么类型的机器、浏览器（本质上是告诉浏览器，我们可以接收什么水平的文件内容）
-
     request = urllib.request.Request(url, headers=head)
     html = ""
     try:
@@ -160,7 +154,7 @@ def askURL(url):
 
 
 # 保存数据
-def saveData(datalist, savepath):
+def saveBookData(datalist, savepath):
     print("save....")
     book = xlwt.Workbook(encoding="utf-8", style_compression=0)  # 创建workbook对象
     sheet = book.add_sheet('豆瓣读书Top250', cell_overwrite_ok=True)  # 创建工作表
@@ -174,30 +168,12 @@ def saveData(datalist, savepath):
             sheet.write(i + 1, j, data[j])  # 数据
 
     book.save(savepath)  # 保存
-#
-# def test1():
-#     datalist=[]
-#     data=[]
-#     data.append('https://book.douban.com/subject/1007305/')
-#     data.append('https://img1.doubanio.com/view/subject/s/public/s1070959.jpg')
-#     data.append('红楼梦')
-#     data.append('[dahsjkdhakdkkjnd] ')
-#     data.append('9.6')
-#     data.append('351106')
-#     data.append('都云作者痴，谁解其中味？')
-#     data.append('[清] 曹雪芹 著   人民文学出版社   1996-12   59.70元')
-#     data=tuple(data)
-#     datalist.append(data)
-#     print(datalist)
-#     savepath = "F:\文献（看完）\论文\爬虫\豆瓣读书Top250.csv"
-#     saveToCsv(datalist,savepath)
-#     return
+
 
 if __name__ == "__main__":  # 当程序执行时
     # 调用函数
     main()
-    # test1()
-    # init_db("movietest.db")
+    # beforeTest1()
     print("爬取完毕！")
 
 
