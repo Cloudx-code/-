@@ -2,7 +2,7 @@ import re
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from csvUtil import getOneRowInCsv,saveToCsv
+from util.csvUtil import getOneRowInCsv,saveToCsv
 import json
 
 
@@ -12,7 +12,7 @@ def getSeleniumDriver():
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
     # 这里指定 options 参数
-    driver = webdriver.Chrome(r"D:\chromeDriver\chromedriver.exe", options=options)
+    driver = webdriver.Chrome(r"E:\chromeDriver\chromedriver.exe", options=options)
     return driver
 
 def getAuthorURL(driver,authorName):
@@ -22,6 +22,9 @@ def getAuthorURL(driver,authorName):
     html = driver.page_source
     findURL = re.compile(r'<a href="(.*?)" data-moreurl="" class="cover-link"><img')
     authorURL = re.findall(findURL,html)
+    # Selenium自带的方法
+    # elem = d.find_element(By.CLASS_NAME, "cover-link")
+    # href = elem.get_attribute("href")
     print(authorName,authorURL)
     if authorURL==[]:
         return " "
@@ -69,7 +72,7 @@ def getAuthorsInfo(driver,authorData):
     authorTextInfo = []
     # 存储爬取失败的作者
     errAuthorInfo = []
-    with open("authorName.json", "a+", encoding="utf-8") as f:
+    with open("../bookData/authorName.json", "a+", encoding="utf-8") as f:
         num = 0
         for authorName in authorData:
             if authorName not in haveStoredList:
@@ -92,7 +95,7 @@ def getAuthorsInfo(driver,authorData):
 
         haveStoredList["num"] = num
         json.dump(haveStoredList, f, ensure_ascii=False)
-    with open("authorInfo.txt","a",encoding='utf=8') as f:
+    with open("../bookData/authorInfo.txt", "a", encoding='utf=8') as f:
         for i in authorTextInfo:
             f.write(i)
 
@@ -120,6 +123,12 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    d = getSeleniumDriver()
+    # <a href="https://book.douban.com/author/4604358/" data-moreurl="" class="cover-link"><img
+    d.get(r"https://search.douban.com/book/subject_search?search_text=曹雪芹")
+    elem = d.find_element(By.CLASS_NAME,"cover-link")
+    href = elem.get_attribute("href")
+    print(href)
 
 

@@ -1,8 +1,5 @@
 import json
 
-import bs4
-import urllib
-from csvUtil import getCsv
 import requests
 baseUrl = "https://api.xlore.org/query?instances="
 bookName = "《红楼梦》"

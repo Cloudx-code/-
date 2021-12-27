@@ -1,12 +1,12 @@
 
-from CN_DBpedia import getTripleInfoFromCN_DB
+from spider.CN_DBpedia import getTripleInfoFromCN_DB
 from neo4jUtil import getNeo4jConn,createRelation,createMasterNode,createSlaveNode,\
-    whetherNodeExist,getNeo4jNode,whetherRelationshipExist
-from csvUtil import getCsv
+    whetherNodeExist,getNeo4jNode
+from util.csvUtil import getCsv
 # match (n) detach delete n
 # 删库
-basePath = r""
-# 通过CN_DB扩充数据
+basePath = r"bookData/"
+# 通过CN_DB扩充数据(当前这个返回方式很丑陋，需要改进)
 def expandDataFromCN_DB(graphConn,node1):
     j=0
     tripleInfo = getTripleInfoFromCN_DB(node1.get("name"))
@@ -47,8 +47,10 @@ def createNodeAndRelationFromCsv(graphConn, titleName, csvData):
     # 作者,若作者节点不存在，则创建节点，若存在则只创建关系
     slaveNode5 = createSlaveNode(graphConn, str(titleName[8]), str(csvData[8]))
     # 创建关系
-    # 作者与书籍
-    if createRelation(graphConn, slaveNode5, str(titleName[8]), masterNode):
+    # 作者与书籍(双向)
+    if createRelation(graphConn, slaveNode5, "作品", masterNode):
+        j += 1
+    if createRelation(graphConn, masterNode, str(titleName[8]), slaveNode5):
         j += 1
     # 书籍与评分
     if createRelation(graphConn, masterNode, str(titleName[4]), slaveNode1):

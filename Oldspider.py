@@ -1,5 +1,5 @@
 # @Time : 2020/3/3 17:51
-# @File : spider.py
+# @File : Oldspider.py
 
 
 from bs4 import BeautifulSoup  # 网页解析，获取数据
