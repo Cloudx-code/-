@@ -29,19 +29,19 @@
 #         url = 'http://www.douban.com/tag/' + urllib.quote(book_tag) + '/book?start=' + str(page_num * 15)
 #         time.sleep(np.random.rand() * 5)
 #
-#         # Last Version
-#         try:
-#             req = urllib2.Request(url, headers=hds[page_num % len(hds)])
-#             source_code = urllib2.urlopen(req).read()
-#             plain_text = str(source_code)
-#         except (urllib2.HTTPError, urllib2.URLError), e:
-#             print
-#             e
-#             continue
+#         # # Last Version
+#         # try:
+#         #     req = urllib2.Request(url, headers=hds[page_num % len(hds)])
+#         #     source_code = urllib2.urlopen(req).read()
+#         #     plain_text = str(source_code)
+#         # except (urllib2.HTTPError, urllib2.URLError), e:
+#         #     print
+#         #     e
+#         #     continue
 #
-#         ##Previous Version, IP is easy to be Forbidden
-#         # source_code = requests.get(url)
-#         # plain_text = source_code.text
+#         #Previous Version, IP is easy to be Forbidden
+#         source_code = requests.get(url)
+#         plain_text = source_code.text
 #
 #         soup = BeautifulSoup(plain_text)
 #         list_soup = soup.find('div', {'class': 'mod book-list'})

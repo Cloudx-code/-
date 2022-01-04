@@ -1,11 +1,11 @@
 
-from spider.CN_DBpedia import getTripleInfoFromCN_DB
+from CN_DBpedia.CN_DBpedia import getTripleInfoFromCN_DB
 from neo4jUtil import getNeo4jConn,createRelation,createMasterNode,createSlaveNode,\
     whetherNodeExist,getNeo4jNode
 from util.csvUtil import getCsv
 # match (n) detach delete n
 # 删库
-basePath = r"bookData/"
+
 # 通过CN_DB扩充数据(当前这个返回方式很丑陋，需要改进)
 def expandDataFromCN_DB(graphConn,node1):
     j=0
@@ -47,9 +47,7 @@ def createNodeAndRelationFromCsv(graphConn, titleName, csvData):
     # 作者,若作者节点不存在，则创建节点，若存在则只创建关系
     slaveNode5 = createSlaveNode(graphConn, str(titleName[8]), str(csvData[8]))
     # 创建关系
-    # 作者与书籍(双向)
-    if createRelation(graphConn, slaveNode5, "作品", masterNode):
-        j += 1
+    # 作者与书籍(单向)
     if createRelation(graphConn, masterNode, str(titleName[8]), slaveNode5):
         j += 1
     # 书籍与评分
@@ -69,25 +67,9 @@ def expandSomeField(graphConn,masterNode,titleName,csvData):
     j=0
     # 补上拓展的BookType信息,csvData[9]是一串字符串，包含了书籍类别
     j+=expandBookType(graphConn,masterNode,str(titleName[9]),csvData[9])
-    # 根据书籍评分规划为,超高，高，中
-    j+=expandMarkLevel(graphConn,masterNode,"受欢迎程度",csvData[4])
     return j
 
-# 扩展书籍的受欢迎程度,超高,高,中
-def expandMarkLevel(graphConn, masterNode, label, markScoreStr):
-    markScore = float(markScoreStr)
-    j = 0
-    if markScore > 9.5:
-        mark = "超高"
-    elif markScore > 9:
-        mark = "高"
-    else:
-        mark = "中"
-    markNode = createSlaveNode(graphConn,label,mark)
-    if createRelation(graphConn,markNode,label,masterNode):
-        j+=1
-    return j
-
+# 补充书籍用户标签
 def expandBookType(graphConn, masterNode, label, bookTypeSets):
     bookTypes = bookTypeSets.split(" ")
     j=0
@@ -150,7 +132,7 @@ def failRecover(graphConn,failData):
 
 if __name__ == "__main__":
     # savepath = r"F:\文献（看完）\论文\爬虫\豆瓣读书Top250bookType.csv"
-    savepath = basePath+r"豆瓣读书Top250bookType.csv"
+    savepath = "../bookData/"+r"豆瓣读书Top250bookType.csv"
     # 获取neo4j连接
     graphCon = getNeo4jConn()
     # 读取爬虫数据i

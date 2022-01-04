@@ -12,7 +12,7 @@ def getSeleniumDriver():
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
     # 这里指定 options 参数
-    driver = webdriver.Chrome(r"E:\chromeDriver\chromedriver.exe", options=options)
+    driver = webdriver.Chrome(r"D:\chromeDriver\chromedriver.exe", options=options)
     return driver
 
 def getAuthorURL(driver,authorName):
@@ -112,7 +112,7 @@ def main():
     # 获得驱动
     driver = getSeleniumDriver()
     #获得作者信息
-    authorData = getOneRowInCsv(r"豆瓣读书Top250bookType.csv",8)[1:]
+    authorData = getOneRowInCsv(r"../bookData/豆瓣读书Top250bookType.csv",8)[1:]
     # 爬取信息
     # getAuthorsInfo(driver,authorData)
     authorURL = getAuthorsURL(driver,authorData)
@@ -123,12 +123,12 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
-    d = getSeleniumDriver()
-    # <a href="https://book.douban.com/author/4604358/" data-moreurl="" class="cover-link"><img
-    d.get(r"https://search.douban.com/book/subject_search?search_text=曹雪芹")
-    elem = d.find_element(By.CLASS_NAME,"cover-link")
-    href = elem.get_attribute("href")
-    print(href)
+    main()
+    # d = getSeleniumDriver()
+    # # <a href="https://book.douban.com/author/4604358/" data-moreurl="" class="cover-link"><img
+    # d.get(r"https://search.douban.com/book/subject_search?search_text=曹雪芹")
+    # elem = d.find_element(By.CLASS_NAME,"cover-link")
+    # href = elem.get_attribute("href")
+    # print(href)
 
 

@@ -10,7 +10,7 @@ import xlwt  # 进行excel操作
 import csv
 
 
-basePath = r""
+basePath = r"bookData\\"
 def saveToCsv(datalist, savepath,headers):
 
     with open(savepath, 'w',newline="",encoding='utf-8') as f:
@@ -73,9 +73,7 @@ def getBookData(baseurl):
         except:
             print("重试ing")
             html = askURL(url)  # 保存获取到的网页源码
-
         # 2.逐一解析数据
-        i = 0
         soup = BeautifulSoup(html, "html.parser")
         for item in soup.find_all('tr', class_="item"):  # 查找符合要求的字符串，形成列表
             # print(item)   #测试：查看读书item全部信息
