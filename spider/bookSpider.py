@@ -5,18 +5,29 @@ from util.spiderUtil import getFakeHeader
 import numpy as np
 import time
 from bs4 import BeautifulSoup
-from util.csvUtil import saveToCsv
+import random
+from util.spiderUtil import wheTherProxies,getRandomProxies
 
 #根据图书类型获取图书数据(可能有多页)
 def getBookDataByTag(bookTag:str):
     start = 0
     allBookData = []
+    if wheTherProxies()==1:
+        proxies = getRandomProxies()
     while(1):
         url = r"http://book.douban.com/tag/"+bookTag+"?start=" + str(start)
-        time.sleep(np.random.rand() * 5)
         print(url)
         # 获取一份URL的图书信息，并将其存入allBookData中
-        oneURLBookData = getOneURLBookData(url)
+        if wheTherProxies()==1:
+            try:
+                oneURLBookData = getOneURLBookData(url,proxies)
+            except Exception as e:
+                print("获取新IP代理")
+                print(e)
+                proxies = getRandomProxies()
+                continue
+        else:
+            oneURLBookData = getOneURLBookData(url)
         for oneBookData in oneURLBookData:
             allBookData.append(oneBookData)
         start+=len(oneURLBookData)
@@ -27,11 +38,17 @@ def getBookDataByTag(bookTag:str):
 
 
 # 获取当前页URL的所有书籍信息。返回一个list,列表的每个元素代表一本书籍的信息
-def getOneURLBookData(url:str):
+def getOneURLBookData(url:str,proxies:dict={}):
     oneURLBookData = []
-    # 1.获取HTML信息
-    response = requests.get(url, headers=getFakeHeader())
+    if 'http' in proxies:
+        # 1.获取HTML信息
+        print(proxies['http'])
+        response = requests.get(url, headers=getFakeHeader(),proxies=proxies)
+    else:
+        time.sleep(np.random.rand() * 5)
+        response = requests.get(url, headers=getFakeHeader())
     html = response.text
+
     # 2.逐一解析书籍数据
     soup = BeautifulSoup(html,"html.parser")
     for bookItem in soup.find_all('li', class_="subject-item"):
@@ -96,4 +113,23 @@ def parseBookItem(bookItem:str):
     oneBookInfo.append(summary)
     return oneBookInfo
 
+
+def getPublisherByURL(bookURL:str,proxies:dict={}):
+
+    if 'http' in proxies:
+        print(proxies['http'])
+        response = requests.get(bookURL,headers=getFakeHeader(),proxies=proxies)
+    else:
+        response = requests.get(bookURL,headers=getFakeHeader())
+    if response.status_code!=200:
+        raise Exception("status code不为200,code为:",response.status_code)
+    html = response.text
+    findPublisher = re.compile(r'<span class="pl">出版社:</span>\s*(.*?)<br/>')
+    try:
+        res = re.findall(findPublisher,html)[0]
+        return res
+    except Exception as e:
+        print(e)
+        print("出版社通过URL获取失败")
+        return " "
 

@@ -1,4 +1,3 @@
-
 from CN_DBpedia.CN_DBpedia import getTripleInfoFromCN_DB
 from neo4jUtil import getNeo4jConn,createRelation,createMasterNode,createSlaveNode,\
     whetherNodeExist,getNeo4jNode
@@ -81,7 +80,7 @@ def expandBookType(graphConn, masterNode, label, bookTypeSets):
 # 核心函数代码
 def createNodeAndRelation(graphConn, csvDatas):
     # Csv列名
-    tableName = csvDatas[0]
+    titleName = csvDatas[0]
     # 统计创建关系次数
     j=1
     # 轮次数
@@ -90,19 +89,22 @@ def createNodeAndRelation(graphConn, csvDatas):
     failData = []
     # 默认从1开始
     for csvData in csvDatas[1:]:
-        print("第",times,"轮,书名:",str(csvData[2]),"作者:",str(csvData[8]))
+        # 弄个人看的名字
+        bookName = csvData[2]
+        author = csvData[8]
+        print("第",times,"轮,书名:",bookName,"作者:",author)
         times+=1
         #将对CSV文件的内容做节点与关系扩充
-        j+=createNodeAndRelationFromCsv(graphConn,tableName,csvData)
+        j+=createNodeAndRelationFromCsv(graphConn,titleName,csvData)
         #通过CN_DB扩充
         # 扩充作者信息
-        ans = expandDataFromCN_DB(graphConn,getNeo4jNode(graphConn, str(tableName[8]), str(csvData[8])))
+        ans = expandDataFromCN_DB(graphConn,getNeo4jNode(graphConn, titleName[8], author))
         if type(ans)==type(1):
             j+=ans
         else:
             failData.append(ans)
         # 扩充作品信息
-        ans = expandDataFromCN_DB(graphConn,getNeo4jNode(graphConn, str(tableName[2]), str(csvData[2])))
+        ans = expandDataFromCN_DB(graphConn,getNeo4jNode(graphConn, str(titleName[2]), bookName))
         if type(ans)==type(1):
             j+=ans
         else:
@@ -131,15 +133,17 @@ def failRecover(graphConn,failData):
     return j
 
 if __name__ == "__main__":
-    # savepath = r"F:\文献（看完）\论文\爬虫\豆瓣读书Top250bookType.csv"
-    savepath = "../bookData/"+r"豆瓣读书Top250bookType.csv"
     # 获取neo4j连接
     graphCon = getNeo4jConn()
-    # 读取爬虫数据i
-    csvData = getCsv(savepath)
-    # 建立节点与关系
-    createNodeAndRelation(graphCon, csvData)
-
+    # 科技
+    title = "科技"
+    tags = ["科普", "互联网", "科学", "编程", "交互设计", "算法", "用户体验", "web", "交互", "通信", "UE", "神经网络", "UCD", "程序"]
+    for tag in tags:
+        loadPath = r"../bookData/"+title+"/book-list-" + tag+ ".csv"
+        # 读取爬虫数据i
+        csvData = getCsv(loadPath)
+        # 建立节点与关系
+        createNodeAndRelation(graphCon, csvData)
 
 
 
