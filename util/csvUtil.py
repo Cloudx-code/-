@@ -7,7 +7,8 @@ import numpy as np
 from util.spiderUtil import wheTherProxies,getRandomProxies
 # 不加的话会出路径问题（简直莫名其妙）
 import sys
-sys.path.append(r'F:\文献（看完）\论文\爬虫2\spider')
+# sys.path.append(r'F:\文献（看完）\论文\爬虫2\spider')
+sys.path.append(r'F:\pythonProject\benchmark\爬虫\spider')
 
 from spider.bookSpider import getPublisherByURL
 import spider.bookSpider
@@ -42,8 +43,9 @@ def getBookLabelInfo(savePath):
                 bookLabel = getBookLabel(bookDetail)
             except Exception as e:
                 print(e)
-                print("尝试用代理抢救一下")
-                bookLabel = getBookLabel(bookDetail,proxies)
+                # print("尝试用代理抢救一下")
+                print('再试一次')
+                bookLabel = getBookLabel(bookDetail)
 
         if len(bookLabel)<=0:
             bookTypeStr=" "

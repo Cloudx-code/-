@@ -4,6 +4,8 @@ from neo4jUtil import getNeo4jConn,createRelation,createMasterNode,createSlaveNo
 from util.csvUtil import getCsv
 # match (n) detach delete n
 # 删库
+# MATCH (n:`图书中文名`) RETURN count(*) 查询某一节点数量
+# MATCH (n:`图书中文名`{name:'红楼梦'})-[]-()  RETURN count(*) 查询某一节点的关系数量
 
 # 通过CN_DB扩充数据(当前这个返回方式很丑陋，需要改进)
 def expandDataFromCN_DB(graphConn,node1):
