@@ -17,8 +17,8 @@ def getBookLabelInfo(savePath):
     res = getCsv(savePath)
     data = []
     j = 1
-    if wheTherProxies()==1:
-        proxies = getRandomProxies()
+
+    proxies = getRandomProxies()
     for i in res[1:]:
         # Csv的第一列是书籍详情链接，第三列是书名
         bookDetail = i[0]
@@ -38,7 +38,12 @@ def getBookLabelInfo(savePath):
                     proxies = getRandomProxies()
 
         else:
-            bookLabel = getBookLabel(bookDetail)
+            try:
+                bookLabel = getBookLabel(bookDetail)
+            except Exception as e:
+                print(e)
+                print("尝试用代理抢救一下")
+                bookLabel = getBookLabel(bookDetail,proxies)
 
         if len(bookLabel)<=0:
             bookTypeStr=" "
@@ -264,16 +269,16 @@ def addPopularPublisherToCsv(loadPath,savePath):
 
 if __name__ == '__main__':
 
-    title = "经管"
-    tags = ["企业史","策划"]
+    title = "生活"
+    tags = ["旅行"]
 
 
     for tag in tags:
         loadPath = r"../bookData/"+title+"/book-list-" + tag+ ".csv"
         savePath = r"../bookData/"+title+"/book-list-" + tag+ ".csv"
-        # 添加作者类型
-        addAuthorInfoToCsv(loadPath=loadPath, savePath=savePath)
-        print(tag, "类型增加作者列执行完毕")
+        # # 添加作者类型
+        # addAuthorInfoToCsv(loadPath=loadPath, savePath=savePath)
+        # print(tag, "类型增加作者列执行完毕")
         # 添加用户标签
         addBookLabelInfoToCsv(loadPath=loadPath, savePath=savePath)
         print(tag, "类型增加用户标签执行完毕")

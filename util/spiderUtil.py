@@ -10,7 +10,7 @@ def getFakeHeader():
 
 def wheTherProxies():
     # 返回0表示不启用，1表示启用
-    proxyFlag = 1
+    proxyFlag = 0
     return proxyFlag
 
 def getRandomProxies():
