@@ -8,7 +8,7 @@ from util.spiderUtil import wheTherProxies,getRandomProxies
 # 不加的话会出路径问题（简直莫名其妙）
 import sys
 # sys.path.append(r'F:\文献（看完）\论文\爬虫2\spider')
-sys.path.append(r'F:\pythonProject\benchmark\爬虫\spider')
+sys.path.append(r'..\spider')
 
 from spider.bookSpider import getPublisherByURL
 import spider.bookSpider
@@ -73,8 +73,9 @@ def getBookLabel(bookUrl:str,proxies:dict={}):
         time.sleep(np.random.rand() * 5)
         rsp = requests.get(bookUrl, headers=spider.bookSpider.getFakeHeader())
     if rsp.status_code!=200:
+        print(rsp.status_code)
         raise Exception("访问失败，status_code不等于200")
-    rsp.content.decode("utf-8")
+    # rsp.content.decode("utf-8")
     result = re.findall(findTheme, rsp.text)
     return result
 
@@ -90,7 +91,7 @@ def addBookLabelInfoToCsv(loadPath, savePath):
     res.to_csv(savePath, mode='w', index=False)
 
 # 读取csv
-def getCsv(savepath):
+def getCsv(savepath:str):
     res = []
     with open(savepath, 'r', encoding='utf-8') as f:
         f_csv = csv.reader(f)
@@ -148,11 +149,13 @@ def handleChaosAuthorData(chaosData:str):
         author = author.replace('［', '[')
         author = author.replace('(', '[')
         author = author.replace('（', '[')
+        author = author.replace('{', '[')
         author = author.replace('】', ']')
         author = author.replace('］', ']')
         author = author.replace(')', ']')
         author = author.replace('）', ']')
         author = author.replace('〕',']')
+        author = author.replace('}',']')
         if author.startswith('['):
             author = author[(author.index(']')) + 1:]
         author = author.strip()
@@ -271,8 +274,8 @@ def addPopularPublisherToCsv(loadPath,savePath):
 
 if __name__ == '__main__':
 
-    title = "生活"
-    tags = ["旅行"]
+    title = "文学"
+    tags = ["杂文"]
 
 
     for tag in tags:
@@ -281,9 +284,9 @@ if __name__ == '__main__':
         # # 添加作者类型
         # addAuthorInfoToCsv(loadPath=loadPath, savePath=savePath)
         # print(tag, "类型增加作者列执行完毕")
-        # 添加用户标签
-        addBookLabelInfoToCsv(loadPath=loadPath, savePath=savePath)
-        print(tag, "类型增加用户标签执行完毕")
+        # # 添加用户标签
+        # addBookLabelInfoToCsv(loadPath=loadPath, savePath=savePath)
+        # print(tag, "类型增加用户标签执行完毕")
         # 添加出版社
         addPublisherToCsv(loadPath=loadPath, savePath=savePath)
         print(tag, "类型增加出版社执行完毕")

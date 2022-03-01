@@ -1,151 +1,50 @@
-from CN_DBpedia.CN_DBpedia import getTripleInfoFromCN_DB
-from neo4jUtil import getNeo4jConn,createRelation,createMasterNode,createSlaveNode,\
-    whetherNodeExist,getNeo4jNode
-from util.csvUtil import getCsv
-# match (n) detach delete n
-# 删库
+from neo4jUtil import getNeo4jConn
+from neo4jMethod import createNeo4jByCsv,relateTitleAndTags
+# match (n) detach delete n  删库
 # MATCH (n:`图书中文名`) RETURN count(*) 查询某一节点数量
-# MATCH (n:`图书中文名`{name:'红楼梦'})-[]-()  RETURN count(*) 查询某一节点的关系数量
 
-# 通过CN_DB扩充数据(当前这个返回方式很丑陋，需要改进)
-def expandDataFromCN_DB(graphConn,node1):
-    j=0
-    tripleInfo = getTripleInfoFromCN_DB(node1.get("name"))
-    if len(tripleInfo) > 0 and tripleInfo[0]=="http wrong":
-        return node1
-    for i in tripleInfo:
-        relationship = i[0]
-        node2Info = i[1]
-        node2 = getNeo4jNode(graphConn,"CN_DB",str(node2Info))
-        if whetherNodeExist(node2):
-            continue
-        node2 = createSlaveNode(graphConn,"CN_DB",str(node2Info))
-        if createRelation(graphConn,node1,str(relationship),node2):
-            j+=1
-    return j
-#从CSV中创建节点与关系
-def createNodeAndRelationFromCsv(graphConn, titleName, csvData):
-    j=0
-    # # 1.书籍链接详情
-    # createSlaveNode(graphCon, str(tableName[0]), str(i[0]))
-    # # 2.图片链接
-    # createSlaveNode(graphCon, str(tableName[1]), str(i[1]))
-    # 3.图书中文名,node = Node(label,name = name,书籍链接=bookInfo,图片链接=picInfo,相关信息=relatedInfo)
-    masterNode = createMasterNode(graphConn, str(titleName[2]), str(csvData[2]), str(csvData[0]), str(csvData[1]), str(csvData[7]))
-    # 4.评分
-    slaveNode1 = createSlaveNode(graphConn, str(titleName[4]), str(csvData[4]))
-    # 5.评价数
-    slaveNode2 = createSlaveNode(graphConn, str(titleName[5]), str(csvData[5]))
-    # 6.概况
-    slaveNode3 = createSlaveNode(graphConn, str(titleName[6]), str(csvData[6]))
-    # # 7.相关信息
-    # createSlaveNode(graphCon, str(tableName[7]), str(i[7]))
-    # 8.图书别名
-    if str(csvData[3]) != " " and str(csvData[3]) != '':
-        slaveNode4 = createSlaveNode(graphConn, str(titleName[3]), str(csvData[3]))
-        if createRelation(graphConn, masterNode, str(titleName[3]), slaveNode4):
-            j += 1
-    # 作者,若作者节点不存在，则创建节点，若存在则只创建关系
-    slaveNode5 = createSlaveNode(graphConn, str(titleName[8]), str(csvData[8]))
-    # 创建关系
-    # 作者与书籍(单向)
-    if createRelation(graphConn, masterNode, str(titleName[8]), slaveNode5):
-        j += 1
-    # 书籍与评分
-    if createRelation(graphConn, masterNode, str(titleName[4]), slaveNode1):
-        j += 1
-    # 书籍与评价数
-    if createRelation(graphConn, masterNode, str(titleName[5]), slaveNode2):
-        j += 1
-    # 书籍与概况
-    if createRelation(graphConn, masterNode, str(titleName[6]), slaveNode3):
-        j += 1
-    # 其他字段拓展，BookType,根据书籍评分拓展受欢迎度
-    j+=expandSomeField(graphConn,masterNode,titleName,csvData)
-    return j
-
-def expandSomeField(graphConn,masterNode,titleName,csvData):
-    j=0
-    # 补上拓展的BookType信息,csvData[9]是一串字符串，包含了书籍类别
-    j+=expandBookType(graphConn,masterNode,str(titleName[9]),csvData[9])
-    return j
-
-# 补充书籍用户标签
-def expandBookType(graphConn, masterNode, label, bookTypeSets):
-    bookTypes = bookTypeSets.split(" ")
-    j=0
-    for bookType in bookTypes:
-        bookTypeNode = createSlaveNode(graphConn, label, bookType)
-        if createRelation(graphConn,masterNode,label,bookTypeNode):
-            j+=1
-    return j
-# 核心函数代码
-def createNodeAndRelation(graphConn, csvDatas):
-    # Csv列名
-    titleName = csvDatas[0]
-    # 统计创建关系次数
-    j=1
-    # 轮次数
-    times = 1
-    # 计划重试的关系数据集
-    failData = []
-    # 默认从1开始
-    for csvData in csvDatas[1:]:
-        # 弄个人看的名字
-        bookName = csvData[2]
-        author = csvData[8]
-        print("第",times,"轮,书名:",bookName,"作者:",author)
-        times+=1
-        #将对CSV文件的内容做节点与关系扩充
-        j+=createNodeAndRelationFromCsv(graphConn,titleName,csvData)
-        #通过CN_DB扩充
-        # 扩充作者信息
-        ans = expandDataFromCN_DB(graphConn,getNeo4jNode(graphConn, titleName[8], author))
-        if type(ans)==type(1):
-            j+=ans
-        else:
-            failData.append(ans)
-        # 扩充作品信息
-        ans = expandDataFromCN_DB(graphConn,getNeo4jNode(graphConn, str(titleName[2]), bookName))
-        if type(ans)==type(1):
-            j+=ans
-        else:
-            failData.append(ans)
-        print("已创建第", j, "个关系")
-    # 失败重试的机会
-    j+=failRecover(graphConn,failData)
-    print("共", j, "个关系创建成功")
-    return
-
-
-def failRecover(graphConn,failData):
-    print("有", len(failData), "个节点请求http时失败了,重试ing")
-    k = 0
-    j=0
-    for i in failData:
-        ans = expandDataFromCN_DB(graphConn, i)
-        if type(ans) == type(1):
-            j += ans
-            k += 1
-        else:
-            print(i.get("name"), "节点恢复失败,建议后续手动处理")
-            print(i, "感觉不会有太多,打印完整的瞅瞅")
-    print("错误节点中恢复成功", k, "个")
-
-    return j
-
+# MATCH (n:`专业类型标签`{name:'科技'})-[]-()  RETURN count(*) 查询某一节点的关系数量
+# MATCH (n:`专业类型标签`{name:'科技'})-[]-(m:`专业类型标签`)  RETURN m
 if __name__ == "__main__":
     # 获取neo4j连接
     graphCon = getNeo4jConn()
-    # 科技
-    title = "科技"
-    tags = ["科普", "互联网", "科学", "编程", "交互设计", "算法", "用户体验", "web", "交互", "通信", "UE", "神经网络", "UCD", "程序"]
+    # # 测试
+    # title = "最受欢迎的250本小说"
+    # tags = ["Top250"]
+    # # 科技
+    # title = "科技"
+    # tags = ["科普","互联网","科学","编程","交互设计","算法","用户体验","web","交互","通信","UE","神经网络","UCD","程序"]
+    # # 经管
+    # title = "经管"
+    # tags = ["经济学","管理","经济","商业","金融","投资","营销","理财","创业","股票","广告","企业史","策划"]
+    # # 生活
+    # title = "生活"
+    # tags = ["爱情","成长","生活","心理","女性","旅行","励志","教育",
+    #         "摄影","职场","美食","游记","灵修","健康","情感","人际关系",
+    #         "两性","养生","手工","家居","自助游"]
+    # title = "文化"
+    # tags = ["历史", "心理学", "哲学", "社会学", "传记", "文化", "艺术", "社会",
+    #         "政治", "设计", "政治学", "宗教", "建筑", "电影", "中国历史", "数学",
+    #         "回忆录", "思想", "人物传记", "艺术史", "国学", "人文", "音乐", "绘画",
+    #         "西方哲学", "戏剧", "近代史", "二战", "军事", "佛教", "考古", "自由主义",
+    #         "美术"]
+    # title = "流行"
+    # tags = ["漫画", "推理", "绘本", "悬疑", "东野圭吾", "青春", "科幻", "言情",
+    #         "推理小说", "奇幻", "武侠", "日本漫画", "耽美", "科幻小说", "网络小说", "三毛",
+    #         "韩寒", "亦舒", "阿加莎·克里斯蒂", "金庸", "穿越", "安妮宝贝", "魔幻", "轻小说",
+    #         "郭敬明", "青春文学", "几米", "J.K.罗琳", "幾米", "张小娴", "校园", "古龙",
+    #         "高木直子", "沧月", "余秋雨", "张悦然"]
+
+    title = "文学"
+    tags =["小说","文学","外国文学","经典","中国文学","随笔","日本文学","散文",
+            "村上春树","诗歌","童话","名著","儿童文学","古典文学","余华","王小波",
+            "当代文学","杂文","张爱玲","外国名著","鲁迅","钱钟书","诗词","茨威格",
+           "米兰·昆德拉","杜拉斯","港台"]
+
     for tag in tags:
-        loadPath = r"../bookData/"+title+"/book-list-" + tag+ ".csv"
-        # 读取爬虫数据i
-        csvData = getCsv(loadPath)
-        # 建立节点与关系
-        createNodeAndRelation(graphCon, csvData)
+        createNeo4jByCsv(graphCon,title,tag)
+        print(tag,"创建完毕")
 
 
+    relateTitleAndTags(graphCon,title,tags)
 

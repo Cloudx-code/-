@@ -1,8 +1,8 @@
 from fake_useragent import UserAgent
 import random
 import sys
-sys.path.append(r'F:\文献（看完）\论文\爬虫2\util')
-sys.path.append(r'F:\pythonProject\benchmark\爬虫\util')
+# sys.path.append(r'F:\文献（看完）\论文\爬虫2\util')
+sys.path.append(r'..\util')
 
 def getFakeHeader():
     ua = UserAgent()
@@ -24,7 +24,7 @@ def getRandomProxies():
 
 def getAllIP():
     # with open(r"F:\文献（看完）\论文\爬虫2\util\ip.txt","r") as f:
-    with open(r"F:\pythonProject\benchmark\爬虫\util\ip.txt","r") as f:
+    with open(r"..\util\ip.txt","r") as f:
         a = f.read()
         alist = a.split('\n')
 
