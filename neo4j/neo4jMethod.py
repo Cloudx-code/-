@@ -145,7 +145,6 @@ def createNeo4jByCsv(graphConn,title:str,tag:str):
         bookNode = createBookNode(graphConn,bookData[:-3],labels[:-3])
         # 作者节点(可能有多个作者)
         authorsNode = []
-
         authorsName = bookData[8].split('&')
         for authorName in authorsName:
             authorNode = createGeneralNode(graphConn,labels[8],authorName)
@@ -178,5 +177,31 @@ def relateTitleAndTags(graphConn,title,tags):
         tagNode = createGeneralNode(graphConn, "专业类型标签", tag)
         createRelation(graphConn,titleNode,"包含",tagNode)
 
+# 这个完全是补丁，前面的代码createNeo4jByCsv写掉了一块
+# 功能：更新作者拥有哪些用户标签和专业类型标签
+def addAuthorBookTypeRelations(graphConn,title,tag):
+    tagNode = createGeneralNode(graphConn, "专业类型标签", tag)
+    loadPath = r"../bookData/" + title + "/book-list-" + tag + ".csv"
+    csvData = getCsv(loadPath)
+    labels = csvData[0]
+    for bookData in csvData[1:]:
+        # 作者节点(可能有多个作者)
+        authorsNode = []
+        authorsName = bookData[8].split('&')
+        for authorName in authorsName:
+            authorNode = createGeneralNode(graphConn, labels[8], authorName)
+            authorsNode.append(authorNode)
+
+        # 用户标签节点(可能有多个标签)
+        userLabelsNode = []
+        userLabels = bookData[9].split('&')
+        for userLabelName in userLabels:
+            userLabelNode = createGeneralNode(graphConn, labels[9], userLabelName)
+            userLabelsNode.append(userLabelNode)
+
+        for authorNode in authorsNode:
+            for userLabelNode in userLabelsNode:
+                createRelation(graphConn, authorNode, "被标记", userLabelNode)
+            createRelation(graphConn, authorNode, "被标记", tagNode)
 
 
