@@ -1,8 +1,11 @@
+# 注意事项！！！这个1.csv可以直接通过Excel编辑（gbk编码），但是其他的会出现乱码问题。（utf-8编码）
+
 import json
 import csv
+
 def getCsv(savepath:str):
     res = []
-    with open(savepath, 'r') as f:
+    with open(savepath, 'r',encoding='utf-8') as f:
         f_csv = csv.reader(f)
         headers = next(f_csv)
         res.append(headers)
@@ -10,8 +13,9 @@ def getCsv(savepath:str):
             res.append(row)
     return res
 
-def handleAllDiologue():
-    dialogueData = getCsv("../bookData/语料/1.csv")
+# dataType:train,dev,test
+def handleAllDiologue(dataType:str):
+    dialogueData = getCsv("../bookData/语料/"+dataType+".csv")
     dialogueAllLists = []
     dialogueDict = {}
     dialogueMessages = []
@@ -59,12 +63,15 @@ def handleAllDiologue():
     dialogueJson = json.dumps(dialogueAllLists, sort_keys=True, indent=4, separators=(',', ': '), ensure_ascii=False)
     return dialogueJson
 
-
+# 如果用1.csv的话需要改格式，好像不是utf-8的格式。
 if __name__ == '__main__':
-    dialogueJson = handleAllDiologue()
-    print('\n\n\n', dialogueJson)
-    with open("1.json", 'w', newline="", encoding='utf-8') as f:
-        f.write(dialogueJson)
+    # dataTypes = ["train","dev","test"]
+    dataTypes = ["sentence"]
+    for dataType in dataTypes:
+        dialogueJson = handleAllDiologue(dataType)
+        print('\n\n\n', dialogueJson)
+        with open(dataType+".json", 'w', newline="", encoding='utf-8') as f:
+            f.write(dialogueJson)
     print("存入成功!")
 
 
